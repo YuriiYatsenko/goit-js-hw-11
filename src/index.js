@@ -3,14 +3,14 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 
 const form = document.querySelector('form');
 const imageCardsContainer = document.querySelector('.image-cards');
-const paginationContainer = document.querySelector('.pagination');
 const messageContainer = document.querySelector('.message');
 let currentPage = 1;
 const perPage = 20;
 const lightbox = new SimpleLightbox('.image-cards a');
+const loadMoreBtn = document.querySelector('.load-more');
 
 const renderImageCards = (images) => {
-  let imageCardsHTML = '';
+  let imageCardsHTML = imageCardsContainer.innerHTML;
 
   images.forEach((image) => {
     const imageCardHTML = `
@@ -26,49 +26,12 @@ const renderImageCards = (images) => {
 
   imageCardsContainer.innerHTML = imageCardsHTML;
   lightbox.refresh();
-};
 
-const renderPaginationButtons = (currentPage, totalPages) => {
-  let paginationButtonsHTML = '';
-
-  for (let i = 1; i <= totalPages; i++) {
-    const isActive = currentPage === i;
-    const paginationButtonHTML = `
-      <button class="${isActive ? 'active' : ''}" ${isActive ? 'disabled' : ''} data-page="${i}">${i}</button>
-    `;
-    paginationButtonsHTML += paginationButtonHTML;
+  if (currentPage <= totalPages) {
+    loadMoreBtn.style.display = 'block';
+  } else {
+    loadMoreBtn.style.display = 'none';
   }
-
-  paginationContainer.innerHTML = paginationButtonsHTML;
-};
-
-const scrollToTop = (duration) => {
-  const start = window.pageYOffset;
-  const distance = 0 - start;
-  const startTime = performance.now();
-
-  const easeInOutQuad = (t) => {
-    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-  };
-
-  const scroll = (timestamp) => {
-    const currentTime = performance.now() - startTime;
-    const timeFraction = currentTime / duration;
-    const delta = easeInOutQuad(timeFraction);
-    window.scrollTo(0, start + distance * delta);
-    if (currentTime < duration) {
-      requestAnimationFrame(scroll);
-    }
-  };
-
-  requestAnimationFrame(scroll);
-};
-
-const showMessage = (totalHits) => {
-  const messageHTML = `
-    <p>Hooray! We found ${totalHits} images.</p>
-  `;
-  messageContainer.innerHTML = messageHTML;
 };
 
 form.addEventListener('submit', async (event) => {
@@ -91,44 +54,45 @@ form.addEventListener('submit', async (event) => {
     });
 
     const images = response.data.hits;
-    const totalPages = Math.ceil(response.data.totalHits / perPage);
+    totalPages = Math.ceil(response.data.totalHits / perPage);
 
     renderImageCards(images);
-    renderPaginationButtons(currentPage, totalPages);
     showMessage(response.data.totalHits);
+    loadMoreBtn.style.display = 'block';
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+loadMoreBtn.addEventListener('click', async () => {
+  currentPage++;
+
+  try {
+    const searchQuery = form.elements.searchQuery.value;
+    const response = await axios.get('https://pixabay.com/api/', {
+      params: {
+        key: '35626787-1bb82a1b86a7ccdeac34922a3',
+        q: searchQuery,
+        image_type: 'photo',
+        orientation: 'horizontal',
+        safesearch: true,
+        per_page: perPage,
+        page: currentPage,
+      },
+    });
+
+    const images = response.data.hits;
+
+    renderImageCards(images);
     scrollToTop(500);
   } catch (error) {
     console.error(error);
   }
 });
 
-paginationContainer.addEventListener('click', async (event) => {
-  if (event.target.tagName === 'BUTTON') {
-    const page = parseInt(event.target.dataset.page);
-    currentPage = page;
-
-    try {
-      const searchQuery = form.elements.searchQuery.value;
-      const response = await axios.get('https://pixabay.com/api/', {
-        params: {
-          key: '35626787-1bb82a1b86a7ccdeac34922a3',
-          q: searchQuery,
-          image_type: 'photo',
-          orientation: 'horizontal',
-          safesearch: true,
-          per_page: perPage,
-          page: currentPage,
-        },
-      });
-
-      const images = response.data.hits;
-      const totalPages = Math.ceil(response.data.totalHits / perPage);
-
-      renderImageCards(images);
-      renderPaginationButtons(currentPage, totalPages);
-      scrollToTop(500);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-});
+const showMessage = (totalHits) => {
+  const messageHTML = `
+    <p>Hooray! We found ${totalHits} images.</p>
+  `;
+  messageContainer.innerHTML = messageHTML;
+};

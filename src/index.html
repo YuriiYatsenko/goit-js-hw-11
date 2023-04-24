@@ -71,34 +71,29 @@
       font-weight: bold;
     }
 
-    .pagination {
+    .load-more {
       display: flex;
       justify-content: center;
+      align-items: center;
       margin-top: 20px;
-    }
-
-    .pagination button {
-      padding: 10px;
-      background-color: #4caf50;
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
       color: #fff;
-      border: none;
+      background-color: #007bff;
       border-radius: 5px;
-      margin: 5px;
-      font-size: 16px;
+      border: none;
       cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
     }
 
-    .pagination button:hover {
-      background-color: #5cbf62;
+    .load-more:hover {
+      background-color: #0069d9;
     }
 
-    .pagination button:disabled {
-      background-color: #ddd;
-      cursor: not-allowed;
-    }
-
-    .pagination button.active {
-      background-color: #5cbf62;
+    .load-more:active {
+      background-color: #005cbf;
     }
   </style>
 </head>
@@ -113,9 +108,9 @@
 
   <div class="image-cards"></div>
 
-  <div class="pagination"></div>
+  <div class="message"></div>
 
-  <div class="message-container"></div>
+  <button type="button" class="load-more" style="display:none;">Load more</button>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script type="module" src="/src/index.js"></script>
