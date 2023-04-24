@@ -1,10 +1,13 @@
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
+import axios from "axios";
 
 const form = document.querySelector('form');
 const imageCardsContainer = document.querySelector('.image-cards');
 const messageContainer = document.querySelector('.message');
 let currentPage = 1;
+let totalPages = 1;
+
 const perPage = 20;
 const lightbox = new SimpleLightbox('.image-cards a');
 const loadMoreBtn = document.querySelector('.load-more');
