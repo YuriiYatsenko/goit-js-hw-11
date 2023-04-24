@@ -13,7 +13,7 @@ const lightbox = new SimpleLightbox('.image-cards a');
 const loadMoreBtn = document.querySelector('.load-more');
 
 const renderImageCards = (images) => {
-  let imageCardsHTML = imageCardsContainer.innerHTML;
+  let imageCardsHTML = '';
 
   images.forEach((image) => {
     const imageCardHTML = `
@@ -27,10 +27,14 @@ const renderImageCards = (images) => {
     imageCardsHTML += imageCardHTML;
   });
 
-  imageCardsContainer.innerHTML = imageCardsHTML;
+  if (currentPage === 1) {
+    imageCardsContainer.innerHTML = imageCardsHTML;
+  } else {
+    imageCardsContainer.innerHTML += imageCardsHTML;
+  }
   lightbox.refresh();
 
-  if (currentPage <= totalPages) {
+  if (currentPage < totalPages) {
     loadMoreBtn.style.display = 'block';
   } else {
     loadMoreBtn.style.display = 'none';
@@ -61,7 +65,6 @@ form.addEventListener('submit', async (event) => {
 
     renderImageCards(images);
     showMessage(response.data.totalHits);
-    loadMoreBtn.style.display = 'block';
   } catch (error) {
     console.error(error);
   }
